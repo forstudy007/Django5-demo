@@ -2,7 +2,7 @@ import os.path
 
 from django.http import HttpResponse, StreamingHttpResponse, FileResponse
 from django.shortcuts import redirect, render
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from helloWorld.forms import StudentForm
 from helloWorld.models import StudentInfo
@@ -221,5 +221,19 @@ class Update(UpdateView):
     model = StudentInfo
     # 指定form
     form_class = StudentForm
+    # 执行成功后跳转地址
+    success_url = '/student/list'
+
+
+# 删除视图
+class Delete(DeleteView):
+    # 设置模版文件
+    template_name = "student/delete.html"
+    # 设置模型外的数据
+    extra_context = {'title': '学生信息删除'}
+    # 设置上下文对象名称
+    context_object_name = 'student'
+    # 设置查询模型
+    model = StudentInfo
     # 执行成功后跳转地址
     success_url = '/student/list'

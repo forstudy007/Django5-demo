@@ -48,5 +48,5 @@ urlpatterns = [
     path('student/<int:pk>/', helloWorld.views.Detail.as_view()),
     path('student/create', helloWorld.views.Create.as_view()),
     path('student/update/<int:pk>', helloWorld.views.Update.as_view()),
-
+    path('student/delete/<int:pk>', helloWorld.views.Delete.as_view()),
 ]
