@@ -1,11 +1,13 @@
 import os.path
 
+from django.core.paginator import Paginator
+from django.db.models.functions import datetime
 from django.http import HttpResponse, StreamingHttpResponse, FileResponse
 from django.shortcuts import redirect, render
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from helloWorld.forms import StudentForm
-from helloWorld.models import StudentInfo
+from helloWorld.models import StudentInfo, BookInfo, BookTypeInfo
 
 
 # Create your views here.
@@ -223,3 +225,150 @@ class Update(UpdateView):
     form_class = StudentForm
     # 执行成功后跳转地址
     success_url = '/student/list'
+
+
+# 删除视图
+class Delete(DeleteView):
+    model = StudentInfo
+    template_name = "student/delete.html"
+    success_url = '/student/list'
+    context_object_name = 'student'
+    pk_url_kwarg = 'id'
+    extra_context = {"title": "删除学生信息"}
+
+
+# 内置模板引擎
+class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+
+def index(request):
+    # 演示过滤器
+    str = "hello"
+    date = datetime.datetime.now()
+    myDict = {"tom": 666, "cat": 999, 'wzw': '333'}
+    # 创建一个对象
+    zhangsan = Person("zhangsan", 20)
+    myList = ["java", "Python", "C"]
+    myTuple = ("python", 222, 3.14, False)
+    context_value = {
+        "msg": str, "msg2": myDict, "msg3": zhangsan,
+        "msg4": myList, "msg5": myTuple, "date": date
+    }
+    context = {
+        "str_data": "模板变量示例",
+        "dict_data": {"tom": 666, "cat": 999},
+        "obj_data": Person("张三", 25),
+        "list_data": ["Java", "Python", "C"],
+        "tuple_data": ("Python", 222, 3.14)
+    }
+    return render(request, 'index.html', context=context_value)
+
+
+# 视图函数
+def to_course(request):
+    return render(request, 'course.html')
+
+
+# 图书列表查询
+def bookList(request):
+    # bookList = BookInfo.objects.all()
+    # # 获取数据集的第一条数据的bookName属性值
+    # print(bookList[0].bookName)
+    # # 返回前2条数据 select * from t_book limit 2
+    # bookList = BookInfo.objects.all()[:2]
+    # # 查询指定字段
+    # bookList = BookInfo.objects.values("bookName", "price")
+    # # 查询指定字段 数据以列表方式返回，列表元素以元组表示
+    # bookList = BookInfo.objects.values_list("bookName", "price")
+    # # 获取单个对象，一般是根据id查询
+    # book = BookInfo.objects.get(id=2)
+    # print(book.bookName)
+    # # 返回满足条件id=2的数据，返回类型是列表
+    # bookList = BookInfo.objects.filter(id=2)
+    # bookList = BookInfo.objects.filter(id=1, price=100)
+    # # filter的查询条件可以设置成字典格式
+    # d = dict(id=1, price=100)
+    # bookList = BookInfo.objects.filter(**d)
+    # # SQL的or查询，需要引入Q，from django.db.models import Q
+    # # 语法格式：Q(field=value)|Q(field=value) 多个Q之间用"|"隔开
+    # bookList = BookInfo.objects.filter(Q(id=1) | Q(price=88))
+    # # SQL的不等于查询，在Q查询中用“~”即可
+    # # SQL select * from t_book where not (id=1)
+    # bookList = BookInfo.objects.filter(~Q(id=1))
+    # # 也可以使用exclude 返回满足条件之外的数据 实现不等于查询
+    # bookList = BookInfo.objects.exclude(id=1)
+    # # 使用count()方法，返回满足查询条件后的数据量
+    # t = BookInfo.objects.filter(id=2).count()
+    # print(t)
+    # # distinct()方法，返回去重后的数据
+    # bookList = BookInfo.objects.values("bookName").distinct()
+    # print(bookList)
+    # # 使用order_by设置排序
+    # # bookList = BookInfo.objects.order_by("price")
+    # # bookList = BookInfo.objects.order_by("price")
+    # bookList = BookInfo.objects.order_by("id")
+    # # annotate类似于SQL里面的GROUP BY方法
+    # # 如果不设置values，默认对主键进行GROUIP BY分组
+    # # SQL: select bookType_id，SUM(price) AS 'price_sum' from t_book GROUP BYbookType_id
+    # r = BookInfo.objects.values('bookType').annotate(Sum('price'))
+    # # SQL: select bookType_id，AVG(price) AS 'price_sum' from t_book GROUP BYbookType_id
+    # r2 = BookInfo.objects.values('bookType').annotate(Avg('price'))
+    # print(r)
+    # print(r2)
+
+    bookList = BookInfo.objects.all().order_by('id')
+    # Paginator(object_list ,per_page)
+    # object_list 结果集/列表
+    # per_page 每页多少条记录
+    p = Paginator(bookList, 2)
+    # 获取第几页的数据
+    bookListPage = p.page(1)
+    print("图书总记录数:", BookInfo.objects.all().count())
+    # 模糊查询图书名称含有"编程"的所有数据
+    # bookList = BookInfo.objects.filter(bookName__contains='编程')
+    # 查询图书价格大于等于50的所有数据
+    bookList = BookInfo.objects.filter(price__gte=50)
+
+    content_value = {'title': "图书列表", "bookList": bookList}
+    return render(request, 'book/list.html', context=content_value)
+
+
+# 多表查询
+def bookList2(request):
+    # 正向查询
+    book: BookInfo = BookInfo.objects.filter(id=2).first()
+    print("图书类别：", book.bookType.bookTypeName)
+
+    # 反向查询
+    bookType: BookTypeInfo = BookTypeInfo.objects.filter(id=1).first()
+    print("图书名称：", bookType.bookinfo_set.first().bookName)
+    print("图书类别：", bookType.bookinfo_set.all())
+    content_value = {"title": "图书列表"}
+    return render(request, 'book/list.html', context=content_value)
+
+
+# 预处理，添加操作
+def preAdd(request):
+    bookTypeList = BookTypeInfo.objects.all()
+    print(bookTypeList)
+    context_value = {"title": "图书添加", "bookTypeList": bookTypeList}
+    return render(request, 'book/add.html', context=context_value)
+
+
+# 图书添加
+def add(request):
+    # print("bookName:", request.POST.get("bookName"))
+    # print("price:", request.POST.get("price"))
+    # print("publishDate:", request.POST.get("publishDate"))
+    # print("bookType_id:", request.POST.get("bookType_id"))
+    book = BookInfo()
+    book.bookName = request.POST.get("bookName")
+    book.publishDate = request.POST.get("publishDate")
+    book.bookType_id = request.POST.get("bookType_id")
+    book.price = request.POST.get("price")
+    book.save()
+    print("id:", book.id)
+    return bookList(request)

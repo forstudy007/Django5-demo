@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}默认标题{% endblock %}</title>
+    {% load static %}
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column; /* 垂直排列子元素（header、content、footer） */
+        }
+
+        .header {
+            padding: 10px 20px; /* 内边距，让内容不贴边 */
+            background-color: #f5f5f5; /* 浅灰色背景，可选 */
+        }
+
+        /* 图片大小设置：通过类选择器控制 logo 大小 */
+        .header img {
+            width: 100px; /* 宽度固定为 200px，可根据需要调整 */
+            height: auto; /* 高度自动，保持图片比例不变（避免变形） */
+            /* 也可以直接写死宽高，如：width: 200px; height: 80px; */
+        }
+
+        /* 内容区样式：让内容区自动占据剩余空间，把页脚推到底部 */
+        .content {
+            flex: 1; /* 占据剩余所有空间 */
+            padding: 20px; /* 内边距，让内容不贴边 */
+        }
+
+        /* 公共页脚样式：固定在页面底部 */
+        .footer {
+            padding: 10px 20px;
+            background-color: #333; /* 深灰色背景，可选 */
+            color: white; /* 文字白色，与背景对比 */
+            text-align: center; /* 文字居中 */
+        }
+    </style>
+</head>
+<body>
+<!-- 公共页眉 -->
+<div class="header">
+    <img src="{% static 'lufei.jpg' %}" alt="logo">
+    <img src="{% static 'lufei2.jpg' %}" alt="logo">
+    <img src="{% static 'lufei.jpg' %}" alt="logo">
+</div>
+<!-- 子模板重写内容 -->
+<div class="content">
+    {% block content %}默认内容{% endblock %}
+</div>
+<!-- 公共页脚 -->
+<div class="footer">
+    版权所有 © www.我要成为海贼王.com
+</div>
+</body>
+</html>

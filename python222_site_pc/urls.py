@@ -48,5 +48,11 @@ urlpatterns = [
     path('student/<int:pk>/', helloWorld.views.Detail.as_view()),
     path('student/create', helloWorld.views.Create.as_view()),
     path('student/update/<int:pk>', helloWorld.views.Update.as_view()),
-
+    path('student/delete/<int:id>', helloWorld.views.Delete.as_view()),
+    path('toCourse/', helloWorld.views.to_course),
+    # 图书列表
+    path('book/list', helloWorld.views.bookList),
+    path('book/list2', helloWorld.views.bookList2),
+    path('book/preAdd', helloWorld.views.preAdd),
+    path('book/add', helloWorld.views.add),
 ]

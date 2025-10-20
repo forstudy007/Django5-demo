@@ -54,9 +54,19 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'python222_site_pc.urls'
 
 TEMPLATES = [
+    # 1.Jinja3 模板引擎
+    # {
+    #     'BACKEND': 'django.template.backends.jinja2.Jinja2',
+    #     'DIRS': [BASE_DIR / 'templates'],
+    #     'APP_DIRS': True,
+    #     'OPTIONS': {
+    #         'environment': 'helloWorld.Jinja3.environment',  # 关联环境配置
+    #     },
+    # },
+    # 2.保留Django内置模板引擎 （兼容Admin等内置功能）
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'helloWorld' / 'templates', BASE_DIR / 'templates', ],
+        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'helloWorld' / 'templates', ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
