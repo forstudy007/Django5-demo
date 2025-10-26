@@ -1,13 +1,15 @@
 import os.path
 
 from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import F
 from django.db.models.functions import datetime
 from django.http import HttpResponse, StreamingHttpResponse, FileResponse
 from django.shortcuts import redirect, render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from helloWorld.forms import StudentForm
-from helloWorld.models import StudentInfo, BookInfo, BookTypeInfo
+from helloWorld.models import StudentInfo, BookInfo, BookTypeInfo, AccountInfo
 
 
 # Create your views here.
@@ -372,3 +374,63 @@ def add(request):
     book.save()
     print("id:", book.id)
     return bookList(request)
+
+
+# 预处理，图书修改
+def preUpdate(request, id):
+    print("id:", id)
+    book = BookInfo.objects.get(id=id)
+    print("book:", book)
+    bookTypeList = BookTypeInfo.objects.all()
+    print("bookTypeList:", bookTypeList)
+    content_value = {"title": "图书修改", "bookTypeList": bookTypeList, "book": book}
+    return render(request, "book/edit.html", context=content_value)
+
+
+# 图书修改
+def update(request):
+    book = BookInfo()
+    book.id = request.POST.get("id")
+    book.bookName = request.POST.get("bookName")
+    book.publishDate = request.POST.get("publishDate")
+    book.bookType_id = request.POST.get("bookType_id")
+    book.price = request.POST.get("price")
+    book.save()
+    return bookList(request)
+
+
+# 图书删除
+def delete(request, id):
+    # 删除所有数据
+    # BookInfo.objects.all().delete()
+    BookInfo.objects.get(id=id).delete()
+    # BookInfo.objects.filter(price__gte=80).delete()
+    return bookList(request)
+
+
+# 模拟转账
+def transfer2(request):
+    a1 = AccountInfo.objects.filter(user="张三")
+    a1.update(account=F('account') + 100)
+    a2 = AccountInfo.objects.filter(user="李四")
+    a2.update(account=F('account') - 100 / 0)
+    return HttpResponse("OK")
+
+
+# 模拟转账
+@transaction.atomic
+def transfer(request):
+    # 开启事务
+    sid = transaction.savepoint()
+    try:
+        a1 = AccountInfo.objects.filter(user="张三")
+        a1.update(account=F('account') + 100)
+        a2 = AccountInfo.objects.filter(user="李四")
+        a2.update(account=F('account') - 100 / 0)
+        # 提交事务（如不设置，当程序执行完成后，会自动提交事务）
+        transaction.savepoint_commit(sid)
+    except Exception as e:
+        print("异常信息:", e)
+        # 事务回滚
+        transaction.savepoint_rollback(sid)
+    return HttpResponse("OK")
