@@ -8,7 +8,7 @@ from django.http import HttpResponse, StreamingHttpResponse, FileResponse
 from django.shortcuts import redirect, render
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
-from helloWorld.forms import StudentForm
+from helloWorld.forms import StudentForm, BookInfoForm, BookInfoModelForm
 from helloWorld.models import StudentInfo, BookInfo, BookTypeInfo, AccountInfo
 
 
@@ -360,6 +360,20 @@ def preAdd(request):
     return render(request, 'book/add.html', context=context_value)
 
 
+# 预处理，添加操作 使用form表单
+def preAdd2(request):
+    form = BookInfoForm()
+    context_value = {"title": "图书添加2", "form": form}
+    return render(request, 'book/add2.html', context=context_value)
+
+
+# 预处理，添加操作 使用modelForm表单
+def preAdd3(request):
+    form = BookInfoModelForm()
+    context_value = {"title": "图书添加3", "form": form}
+    return render(request, 'book/add2.html', context=context_value)
+
+
 # 图书添加
 def add(request):
     # print("bookName:", request.POST.get("bookName"))
@@ -369,7 +383,7 @@ def add(request):
     book = BookInfo()
     book.bookName = request.POST.get("bookName")
     book.publishDate = request.POST.get("publishDate")
-    book.bookType_id = request.POST.get("bookType_id")
+    book.bookType_id = request.POST.get("bookType")
     book.price = request.POST.get("price")
     book.save()
     print("id:", book.id)

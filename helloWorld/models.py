@@ -20,6 +20,9 @@ class BookTypeInfo(models.Model):
         db_table = 't_bookType'  # 表名
         verbose_name = "图书类别"  # Admin后台显示名称
 
+    def __str__(self):
+        return self.bookTypeName
+
 
 # 图书模型（一对多的‘多’方）
 class BookInfo(models.Model):
